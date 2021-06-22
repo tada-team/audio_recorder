@@ -11,8 +11,11 @@ class AudioRecorder {
   /// use [LocalFileSystem] to permit widget testing
   static LocalFileSystem fs = LocalFileSystem();
 
-  static Future start(
-      {String path, AudioOutputFormat audioOutputFormat}) async {
+  static Future start({
+    String path,
+    AudioOutputFormat audioOutputFormat,
+    int audioSamplingRate = 12000,
+  }) async {
     String extension;
     if (path != null) {
       if (audioOutputFormat != null) {
@@ -33,26 +36,31 @@ class AudioRecorder {
       }
       File file = fs.file(path);
       if (await file.exists()) {
-        throw new Exception("A file already exists at the path :" + path);
+        throw Exception("A file already exists at the path :" + path);
       } else if (!await file.parent.exists()) {
-        throw new Exception("The specified parent directory does not exist");
+        throw Exception("The specified parent directory does not exist");
       }
     } else {
       extension = ".m4a"; // default value
     }
-    return _channel
-        .invokeMethod('start', {"path": path, "extension": extension});
+    return _channel.invokeMethod('start', {
+      'path': path,
+      'extension': extension,
+      'audioSamplingRate': audioSamplingRate,
+    });
   }
 
   static Future<Recording> stop() async {
     Map<String, Object> response =
         Map.from(await _channel.invokeMethod('stop'));
-    Recording recording = new Recording(
-        duration: new Duration(milliseconds: response['duration']),
-        path: response['path'],
-        audioOutputFormat:
-            _convertStringInAudioOutputFormat(response['audioOutputFormat']),
-        extension: response['audioOutputFormat']);
+    final recording = Recording(
+      duration: Duration(milliseconds: response['duration']),
+      path: response['path'],
+      audioOutputFormat:
+          _convertStringInAudioOutputFormat(response['audioOutputFormat']),
+      extension: response['audioOutputFormat'],
+      audioSamplingRate: response['audioSamplingRate'] as int,
+    );
     return recording;
   }
 
@@ -115,6 +123,14 @@ class Recording {
   Duration duration;
   // Audio output format
   AudioOutputFormat audioOutputFormat;
+  // Audio sampling rate
+  int audioSamplingRate;
 
-  Recording({this.duration, this.path, this.audioOutputFormat, this.extension});
+  Recording({
+    this.duration,
+    this.path,
+    this.audioOutputFormat,
+    this.extension,
+    this.audioSamplingRate,
+  });
 }

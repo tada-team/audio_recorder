@@ -7,6 +7,7 @@ public class SwiftAudioRecorderPlugin: NSObject, FlutterPlugin, AVAudioRecorderD
     var hasPermissions = false
     var mExtension = ""
     var mPath = ""
+    var mSamplingRate = 12000
     var startTime: Date!
     var audioRecorder: AVAudioRecorder!
 
@@ -23,6 +24,7 @@ public class SwiftAudioRecorderPlugin: NSObject, FlutterPlugin, AVAudioRecorderD
             let dic = call.arguments as! [String : Any]
             mExtension = dic["extension"] as? String ?? ""
             mPath = dic["path"] as? String ?? ""
+            mSamplingRate = dic["audioSamplingRate"] as? Int ?? 12000
             startTime = Date()
             if mPath == "" {
                 let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
@@ -31,7 +33,7 @@ public class SwiftAudioRecorderPlugin: NSObject, FlutterPlugin, AVAudioRecorderD
             }
             let settings = [
                 AVFormatIDKey: getOutputFormatFromString(mExtension),
-                AVSampleRateKey: 12000,
+                AVSampleRateKey: mSamplingRate,
                 AVNumberOfChannelsKey: 1,
                 AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
             ]
@@ -58,6 +60,7 @@ public class SwiftAudioRecorderPlugin: NSObject, FlutterPlugin, AVAudioRecorderD
             recordingResult["duration"] = duration
             recordingResult["path"] = mPath
             recordingResult["audioOutputFormat"] = mExtension
+            recordingResult["audioSamplingRate"] = mSamplingRate
             result(recordingResult)
         case "isRecording":
             print("isRecording")

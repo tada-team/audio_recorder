@@ -37,3 +37,7 @@
 ## [1.0.2] - Published Marc 25, 2020.
 
 * Fix build issues on android
+
+## [1.1.0]
+
+* Made sampling rate configurable
